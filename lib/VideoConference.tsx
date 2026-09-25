@@ -14,7 +14,6 @@ import {
   GridLayout,
   isTrackReference,
   LayoutContextProvider,
-  ParticipantTile,
   RoomAudioRenderer,
   useCreateLayoutContext,
   usePinnedTracks,
@@ -24,11 +23,14 @@ import {
 import { RoomEvent, Track } from 'livekit-client';
 import * as React from 'react';
 import { CopyInviteLink } from './CopyInviteLink';
+import { RaiseHandButton, Tile, useRaisedHandToasts } from './RaiseHand';
+import { ReactionButton, ReactionOverlay, useReactions } from './Reactions';
 
 // The VideoConference prefab from @livekit/components-react 2.9.24, copied so
-// the room can have controls the prefab has no slots for: an invite link
-// next to the ControlBar, and a button that hides the participant strip
-// beside a focused screen share. Kept close to the original to make upstream diffs easy to
+// the room can have controls and tile badges the prefab has no slots for:
+// invite link, raise hand and reactions next to the ControlBar, a hand badge
+// on tiles, and a button that hides the participant strip beside a focused
+// screen share. Kept close to the original to make upstream diffs easy to
 // follow; changes are marked "fork:".
 
 export interface VideoConferenceProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -110,6 +112,9 @@ export function VideoConference({
   const focusTrack = usePinnedTracks(layoutContext)?.[0];
   const carouselTracks = tracks.filter((track) => !isEqualTrackRef(track, focusTrack));
 
+  useRaisedHandToasts();
+  const { reactions, react } = useReactions();
+
   React.useEffect(() => {
     // If screen share tracks are published, and no pin is set explicitly, auto set the screen share.
     if (
@@ -155,19 +160,21 @@ export function VideoConference({
             {!focusTrack ? (
               <div className="lk-grid-layout-wrapper">
                 <GridLayout tracks={tracks}>
-                  <ParticipantTile />
+                  <Tile />
                 </GridLayout>
+                <ReactionOverlay reactions={reactions} />
               </div>
             ) : (
               <div className={`lk-focus-layout-wrapper${stripHidden ? ' meet-strip-hidden' : ''}`}>
                 <FocusLayoutContainer>
                   {!stripHidden && (
                     <CarouselLayout tracks={carouselTracks}>
-                      <ParticipantTile />
+                      <Tile />
                     </CarouselLayout>
                   )}
                   {focusTrack && <FocusLayout trackRef={focusTrack} />}
                 </FocusLayoutContainer>
+                <ReactionOverlay reactions={reactions} />
               </div>
             )}
             {/* fork: the ControlBar between our own control groups. */}
@@ -180,6 +187,8 @@ export function VideoConference({
                 controls={{ chat: true, settings: !!SettingsComponent }}
               />
               <div className="meet-bar-side meet-bar-side-end">
+                <RaiseHandButton />
+                <ReactionButton onReact={react} />
                 {focusTrack && (
                   <button
                     className="lk-button meet-strip-toggle"

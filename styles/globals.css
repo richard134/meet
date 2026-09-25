@@ -115,3 +115,118 @@ body {
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
 }
+
+/* ParticipantTile wrapper for the raised-hand badge. The grid and carousel
+   size their direct children, so the tile fills the wrapper. */
+.meet-tile {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+.meet-tile > .lk-participant-tile {
+  flex: 1;
+  min-width: 0;
+}
+
+.meet-hand-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  border-radius: var(--lk-border-radius);
+  background-color: var(--lk-bg2);
+  box-shadow: 0 0 0 2px #f5b400;
+  pointer-events: none;
+}
+
+.meet-reaction-picker {
+  position: relative;
+}
+
+.meet-reaction-menu {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  right: 0;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: var(--lk-border-radius);
+  background-color: var(--lk-bg2);
+  z-index: 20;
+}
+
+.meet-reaction-menu > .lk-button {
+  font-size: 1.25rem;
+  padding: 0.375rem 0.5rem;
+}
+
+/* Reactions float up from the bottom-left of the video area. */
+.meet-reactions {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.5rem;
+  width: 12rem;
+  height: 50%;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.meet-reaction {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: meet-reaction-float 3s ease-out forwards;
+}
+
+.meet-reaction-emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.meet-reaction-name {
+  margin-top: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  background-color: var(--lk-bg2);
+  white-space: nowrap;
+}
+
+@keyframes meet-reaction-float {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meet-reaction {
+    animation-name: meet-reaction-fade;
+  }
+
+  @keyframes meet-reaction-fade {
+    0%,
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
