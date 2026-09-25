@@ -42,26 +42,76 @@ body {
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* Left end of the control bar row, which the centered ControlBar leaves
-   empty: fixed to the viewport, 0.75rem in like the ControlBar's padding.
-   Doubled class: components-styles loads later and gives .lk-button
-   position: relative. Below the width where the ControlBar drops its labels
-   it fills the whole row, so the icon moves to the top-left corner, which
-   participant tiles leave empty. */
-.lk-button.copy-invite-link {
-  position: fixed;
-  left: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 10;
+/* The room's bottom bar (lib/VideoConference.tsx): our control groups either
+   side of the stock ControlBar. The bar keeps the ControlBar's border and
+   height, and the ControlBar drops its own border. */
+.meet-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  border-top: 1px solid var(--lk-border-color);
 }
 
+.meet-bar > .lk-control-bar {
+  flex: 1;
+  border-top: none;
+  padding-inline: 0;
+}
+
+.meet-bar-side {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+}
+
+.meet-bar-side-end {
+  justify-content: flex-end;
+}
+
+/* Set by lib/VideoConference.tsx when there is no room for our labels. */
+.meet-bar-compact .meet-bar-label {
+  display: none;
+}
+
+/* The layouts take whatever height the bar leaves, instead of the stock
+   calc(100% - 69px), so the bar can wrap on narrow screens. */
+.meet-conference-inner > .lk-grid-layout-wrapper,
+.meet-conference-inner > .lk-focus-layout-wrapper {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+/* On narrow screens our groups share a row above the ControlBar, and the
+   ControlBar may wrap onto a second row rather than clip its last buttons.
+   The participant strip is below the shared screen there, so no toggle.
+   Doubled class on the toggle: components-styles loads later and sets
+   .lk-button's display. */
 @media (max-width: 760px) {
-  .lk-button.copy-invite-link {
-    top: 0.75rem;
-    bottom: auto;
+  .meet-bar {
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
   }
 
-  .copy-invite-link-label {
+  .meet-bar-side {
+    flex: 1 1 auto;
+  }
+
+  .meet-bar > .lk-control-bar {
+    order: 1;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    max-height: none;
+  }
+
+  .lk-button.meet-strip-toggle {
     display: none;
   }
+}
+
+/* Screen share beside the participant strip, or alone when it is hidden. */
+.meet-strip-hidden .lk-focus-layout {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
 }

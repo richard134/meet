@@ -2,19 +2,18 @@
 
 import React from 'react';
 import { decodePassphrase } from '@/lib/client-utils';
-import { CopyInviteLink } from '@/lib/CopyInviteLink';
 import { DebugMode } from '@/lib/Debug';
 import { KeyboardShortcuts } from '@/lib/KeyboardShortcuts';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
 import { sharpenScreenShares } from '@/lib/screenShare';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 import { ConnectionDetails } from '@/lib/types';
+import { VideoConference } from '@/lib/VideoConference';
 import {
   formatChatMessageLinks,
   LocalUserChoices,
   PreJoin,
   RoomContext,
-  VideoConference,
 } from '@livekit/components-react';
 import {
   ExternalE2EEKeyProvider,
@@ -248,7 +247,6 @@ function VideoConferenceComponent(props: {
         />
         <DebugMode />
         <RecordingIndicator />
-        <CopyInviteLink />
       </RoomContext.Provider>
     </div>
   );

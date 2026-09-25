@@ -23,7 +23,7 @@ export function CopyInviteLink() {
   };
 
   return (
-    <button className="lk-button copy-invite-link" onClick={copy} title="Copy invite link">
+    <button className="lk-button" onClick={copy} title="Copy invite link">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path
           d="M6.5 9.5 9.5 6.5M7 4.5l1.25-1.25a2.83 2.83 0 0 1 4 4L11 8.5M9 11.5l-1.25 1.25a2.83 2.83 0 0 1-4-4L5 7.5"
@@ -32,7 +32,7 @@ export function CopyInviteLink() {
           strokeLinecap="round"
         />
       </svg>
-      <span className="copy-invite-link-label">Copy invite link</span>
+      <span className="meet-bar-label">Copy invite link</span>
     </button>
   );
 }
