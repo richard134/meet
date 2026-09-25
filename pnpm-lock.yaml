@@ -17,9 +17,6 @@ importers:
       '@livekit/components-styles':
         specifier: 1.2.0
         version: 1.2.0
-      '@livekit/krisp-noise-filter':
-        specifier: 0.4.4
-        version: 0.4.4(livekit-client@2.22.2(@types/dom-mediacapture-record@1.0.22))
       '@livekit/track-processors':
         specifier: ^0.7.0
         version: 0.7.0(@types/dom-mediacapture-transform@0.1.11)(livekit-client@2.22.2(@types/dom-mediacapture-record@1.0.22))
@@ -2697,6 +2694,7 @@ snapshots:
       '@livekit/mutex': 1.1.1
       '@livekit/protocol': 1.50.4
       livekit-client: 2.22.2(@types/dom-mediacapture-record@1.0.22)
+    optional: true
 
   '@livekit/mutex@1.1.1': {}
 
