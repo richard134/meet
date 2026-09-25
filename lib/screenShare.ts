@@ -1,25 +1,34 @@
 import {
   LocalParticipant,
-  ScreenSharePresets,
   ScreenShareCaptureOptions,
   TrackPublishOptions,
   VideoCodec,
 } from 'livekit-client';
 
 // Screen shares tuned for sharp text. The SDK defaults work against that in
-// three ways: it captures at 1080p (so larger screens are downscaled), it
+// three ways: it captures at 1080p (so most screens are downscaled), it
 // forces a 'motion' hint on VP9/AV1 screen shares (so the encoder drops
 // resolution, not frames, when bandwidth is short), and it caps the bitrate
 // at 2.5 Mbps. The ControlBar in the VideoConference prefab hardcodes its
 // capture options and offers no way to pass publish options, so
 // sharpenScreenShares wraps the participant method the ControlBar calls.
 
+// Every full-screen change (switching windows, resizing a terminal) has to be
+// sent within one frame's share of the bitrate, so the first frame after it
+// comes out rough and the next ones sharpen it. Fewer pixels and fewer frames
+// both mean more bits per frame. 1440p keeps text sharp for viewers, whose
+// tile is rarely larger, while a Retina or ultrawide screen captured natively
+// is 8-19 million pixels. 20 fps is still smooth for scrolling code.
 const MAX_BITRATE = 15_000_000;
-const MAX_FRAMERATE = 30;
+const MAX_FRAMERATE = 20;
+const MAX_WIDTH = 2560;
+const MAX_HEIGHT = 1440;
 
 const captureOptions: ScreenShareCaptureOptions = {
-  // 0x0 means uncapped: capture at the screen's native resolution.
-  resolution: ScreenSharePresets.original.resolution,
+  // A bound, not a target: the browser scales larger screens down to fit,
+  // keeping the aspect ratio, and leaves smaller ones alone (a 3360x1418
+  // screen comes out 2558x1080 in Chrome).
+  resolution: { width: MAX_WIDTH, height: MAX_HEIGHT, frameRate: MAX_FRAMERATE },
   // Keep resolution and drop frames when the encoder is short on bits.
   contentHint: 'detail',
 };
@@ -36,8 +45,8 @@ async function screenShareCodec(): Promise<VideoCodec> {
       type: 'webrtc',
       video: {
         contentType: 'video/H264;packetization-mode=1;profile-level-id=42e01f',
-        width: Math.round(screen.width * devicePixelRatio),
-        height: Math.round(screen.height * devicePixelRatio),
+        width: MAX_WIDTH,
+        height: MAX_HEIGHT,
         bitrate: MAX_BITRATE,
         framerate: MAX_FRAMERATE,
       },
