@@ -41,3 +41,27 @@ body {
   text-align: center;
   color: rgba(255, 255, 255, 0.6);
 }
+
+/* Left end of the control bar row, which the centered ControlBar leaves
+   empty: fixed to the viewport, 0.75rem in like the ControlBar's padding.
+   Doubled class: components-styles loads later and gives .lk-button
+   position: relative. Below the width where the ControlBar drops its labels
+   it fills the whole row, so the icon moves to the top-left corner, which
+   participant tiles leave empty. */
+.lk-button.copy-invite-link {
+  position: fixed;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 10;
+}
+
+@media (max-width: 760px) {
+  .lk-button.copy-invite-link {
+    top: 0.75rem;
+    bottom: auto;
+  }
+
+  .copy-invite-link-label {
+    display: none;
+  }
+}

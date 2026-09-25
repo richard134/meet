@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { decodePassphrase } from '@/lib/client-utils';
+import { CopyInviteLink } from '@/lib/CopyInviteLink';
 import { DebugMode } from '@/lib/Debug';
 import { KeyboardShortcuts } from '@/lib/KeyboardShortcuts';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
@@ -248,6 +249,7 @@ function VideoConferenceComponent(props: {
         />
         <DebugMode />
         <RecordingIndicator />
+        <CopyInviteLink />
       </RoomContext.Provider>
     </div>
   );
