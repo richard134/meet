@@ -50,14 +50,20 @@ async function screenShareCodec(): Promise<VideoCodec> {
 }
 
 export function sharpenScreenShares(participant: LocalParticipant) {
+  // Resolved once, up front: Safari and Firefox only allow getDisplayMedia
+  // straight from the click, so the wrapper below must not await anything
+  // before handing over to the SDK. Until the check finishes, VP8.
+  let videoCodec: VideoCodec = 'vp8';
+  screenShareCodec().then((codec) => (videoCodec = codec));
+
   const setScreenShareEnabled = participant.setScreenShareEnabled.bind(participant);
-  participant.setScreenShareEnabled = async (enabled, capture, publish) => {
+  participant.setScreenShareEnabled = (enabled, capture, publish) => {
     if (!enabled) {
       return setScreenShareEnabled(enabled, capture, publish);
     }
     const publishOptions: TrackPublishOptions = {
       ...publish,
-      videoCodec: await screenShareCodec(),
+      videoCodec,
       screenShareEncoding: { maxBitrate: MAX_BITRATE, maxFramerate: MAX_FRAMERATE },
     };
     return setScreenShareEnabled(enabled, { ...capture, ...captureOptions }, publishOptions);
