@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { Suspense, useState } from 'react';
-import { encodePassphrase, generateRoomId, randomString } from '@/lib/client-utils';
+import { encodePassphrase, randomString } from '@/lib/client-utils';
 import styles from '../styles/Home.module.css';
 
 function Tabs(props: React.PropsWithChildren<{}>) {
@@ -42,19 +42,20 @@ function Tabs(props: React.PropsWithChildren<{}>) {
 }
 
 function DemoMeetingTab(props: { label: string }) {
-  const router = useRouter();
   const [e2ee, setE2ee] = useState(false);
   const [sharedPassphrase, setSharedPassphrase] = useState(randomString(64));
+  // A full navigation, not router.push: /new is behind a login and answers
+  // with a redirect to the room's invite link.
   const startMeeting = () => {
     if (e2ee) {
-      router.push(`/rooms/${generateRoomId()}#${encodePassphrase(sharedPassphrase)}`);
+      window.location.href = `/new#${encodePassphrase(sharedPassphrase)}`;
     } else {
-      router.push(`/rooms/${generateRoomId()}`);
+      window.location.href = '/new';
     }
   };
   return (
     <div className={styles.tabContent}>
-      <p style={{ margin: 0 }}>Try LiveKit Meet for free with our live demo project.</p>
+      <p style={{ margin: 0 }}>Start a meeting, then share its link to invite guests.</p>
       <button style={{ marginTop: '1rem' }} className="lk-button" onClick={startMeeting}>
         Start Meeting
       </button>

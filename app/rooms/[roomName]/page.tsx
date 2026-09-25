@@ -13,6 +13,7 @@ export default async function Page({
     hq?: string;
     codec?: string;
     singlePC?: string;
+    invite?: string;
   }>;
 }) {
   const _params = await params;
@@ -27,6 +28,7 @@ export default async function Page({
   return (
     <PageClientImpl
       roomName={_params.roomName}
+      invite={_searchParams.invite}
       region={_searchParams.region}
       hq={hq}
       codec={codec}

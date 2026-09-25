@@ -36,6 +36,7 @@ const SHOW_SETTINGS_MENU = process.env.NEXT_PUBLIC_SHOW_SETTINGS_MENU == 'true';
 
 export function PageClientImpl(props: {
   roomName: string;
+  invite?: string;
   region?: string;
   hq: boolean;
   codec: VideoCodec;
@@ -54,6 +55,7 @@ export function PageClientImpl(props: {
   const [connectionDetails, setConnectionDetails] = React.useState<ConnectionDetails | undefined>(
     undefined,
   );
+  const [joinError, setJoinError] = React.useState<string | undefined>(undefined);
 
   const handlePreJoinSubmit = React.useCallback(async (values: LocalUserChoices) => {
     setPreJoinChoices(values);
@@ -63,7 +65,14 @@ export function PageClientImpl(props: {
     if (props.region) {
       url.searchParams.append('region', props.region);
     }
+    if (props.invite) {
+      url.searchParams.append('invite', props.invite);
+    }
     const connectionDetailsResp = await fetch(url.toString());
+    if (!connectionDetailsResp.ok) {
+      setJoinError(await connectionDetailsResp.text());
+      return;
+    }
     const connectionDetailsData = await connectionDetailsResp.json();
     setConnectionDetails(connectionDetailsData);
   }, []);
@@ -78,6 +87,7 @@ export function PageClientImpl(props: {
             onSubmit={handlePreJoinSubmit}
             onError={handlePreJoinError}
           />
+          {joinError && <p>{joinError}</p>}
         </div>
       ) : (
         <VideoConferenceComponent

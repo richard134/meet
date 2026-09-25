@@ -1,5 +1,6 @@
 import { randomString } from '@/lib/client-utils';
 import { getLiveKitURL } from '@/lib/getLiveKitURL';
+import { isValidInvite } from '@/lib/invite';
 import { ConnectionDetails } from '@/lib/types';
 import { AccessToken, AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,6 +18,7 @@ export async function GET(request: NextRequest) {
     const participantName = request.nextUrl.searchParams.get('participantName');
     const metadata = request.nextUrl.searchParams.get('metadata') ?? '';
     const region = request.nextUrl.searchParams.get('region');
+    const invite = request.nextUrl.searchParams.get('invite');
     if (!LIVEKIT_URL) {
       throw new Error('LIVEKIT_URL is not defined');
     }
@@ -31,6 +33,9 @@ export async function GET(request: NextRequest) {
     }
     if (participantName === null) {
       return new NextResponse('Missing required query parameter: participantName', { status: 400 });
+    }
+    if (invite === null || !isValidInvite(roomName, invite)) {
+      return new NextResponse('This invite link is invalid or has expired.', { status: 403 });
     }
 
     // Generate participant token
