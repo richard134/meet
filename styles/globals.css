@@ -25,10 +25,11 @@ body {
   padding-inline: 2rem;
 }
 
-.header > img {
-  display: block;
-  margin: auto;
-  max-width: 100%;
+.header > h1 {
+  margin: 0;
+  font-size: 3.5rem;
+  font-weight: 500;
+  text-align: center;
 }
 
 .header > h2 {
@@ -39,29 +40,4 @@ body {
   line-height: 144%;
   text-align: center;
   color: rgba(255, 255, 255, 0.6);
-}
-
-footer {
-  width: 100%;
-  padding: 1.5rem 2rem;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-  background-color: var(--lk-bg);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-footer a,
-h2 a {
-  color: #ff6352;
-  text-decoration-color: #a33529;
-  text-underline-offset: 0.125em;
-}
-
-footer a:hover,
-h2 a {
-  text-decoration-color: #ff6352;
-}
-
-h2 a {
-  text-decoration: none;
 }
