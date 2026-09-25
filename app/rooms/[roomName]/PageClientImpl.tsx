@@ -5,6 +5,7 @@ import { decodePassphrase } from '@/lib/client-utils';
 import { DebugMode } from '@/lib/Debug';
 import { KeyboardShortcuts } from '@/lib/KeyboardShortcuts';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
+import { sharpenScreenShares } from '@/lib/screenShare';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 import { ConnectionDetails } from '@/lib/types';
 import {
@@ -135,8 +136,6 @@ function VideoConferenceComponent(props: {
         : [VideoPresets.h540, VideoPresets.h216],
       red: !e2eeEnabled,
       videoCodec,
-      // The SDK default is 1080p at 15 fps and 2.5 Mbps, which blurs text.
-      screenShareEncoding: { maxBitrate: 8_000_000, maxFramerate: 30 },
     };
     return {
       videoCaptureDefaults: videoCaptureDefaults,
@@ -151,7 +150,11 @@ function VideoConferenceComponent(props: {
     };
   }, [props.userChoices, props.options.hq, props.options.codec]);
 
-  const room = React.useMemo(() => new Room(roomOptions), []);
+  const room = React.useMemo(() => {
+    const room = new Room(roomOptions);
+    sharpenScreenShares(room.localParticipant);
+    return room;
+  }, []);
 
   React.useEffect(() => {
     if (e2eeEnabled) {
