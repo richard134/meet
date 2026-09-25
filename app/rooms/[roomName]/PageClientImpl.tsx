@@ -135,6 +135,8 @@ function VideoConferenceComponent(props: {
         : [VideoPresets.h540, VideoPresets.h216],
       red: !e2eeEnabled,
       videoCodec,
+      // The SDK default is 1080p at 15 fps and 2.5 Mbps, which blurs text.
+      screenShareEncoding: { maxBitrate: 8_000_000, maxFramerate: 30 },
     };
     return {
       videoCaptureDefaults: videoCaptureDefaults,
