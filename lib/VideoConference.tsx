@@ -24,7 +24,7 @@ import { RoomEvent, Track } from 'livekit-client';
 import * as React from 'react';
 import { CopyInviteLink, InviteToChannel } from './CopyInviteLink';
 import { NotificationPrompt } from './NotificationPrompt';
-import { RaiseHandButton, Tile, useRaisedHandToasts } from './RaiseHand';
+import { HandsProvider, RaiseHandButton, Tile } from './RaiseHand';
 import { ReactionButton, ReactionOverlay, useReactions } from './Reactions';
 
 // The VideoConference prefab from @livekit/components-react 2.9.24, copied so
@@ -117,7 +117,6 @@ export function VideoConference({
   const focusTrack = usePinnedTracks(layoutContext)?.[0];
   const carouselTracks = tracks.filter((track) => !isEqualTrackRef(track, focusTrack));
 
-  useRaisedHandToasts();
   const { reactions, react } = useReactions();
 
   React.useEffect(() => {
@@ -161,70 +160,74 @@ export function VideoConference({
     <div className="lk-video-conference" {...props}>
       {isWeb() && (
         <LayoutContextProvider value={layoutContext} onWidgetChange={setWidgetState}>
-          <div className="lk-video-conference-inner meet-conference-inner">
-            {!focusTrack ? (
-              <div className="lk-grid-layout-wrapper">
-                <GridLayout tracks={tracks}>
-                  <Tile />
-                </GridLayout>
-                <ReactionOverlay reactions={reactions} />
-              </div>
-            ) : (
-              <div className={`lk-focus-layout-wrapper${stripHidden ? ' meet-strip-hidden' : ''}`}>
-                <FocusLayoutContainer>
-                  {!stripHidden && (
-                    <CarouselLayout tracks={carouselTracks}>
-                      <Tile />
-                    </CarouselLayout>
+          <HandsProvider>
+            <div className="lk-video-conference-inner meet-conference-inner">
+              {!focusTrack ? (
+                <div className="lk-grid-layout-wrapper">
+                  <GridLayout tracks={tracks}>
+                    <Tile />
+                  </GridLayout>
+                  <ReactionOverlay reactions={reactions} />
+                </div>
+              ) : (
+                <div
+                  className={`lk-focus-layout-wrapper${stripHidden ? ' meet-strip-hidden' : ''}`}
+                >
+                  <FocusLayoutContainer>
+                    {!stripHidden && (
+                      <CarouselLayout tracks={carouselTracks}>
+                        <Tile />
+                      </CarouselLayout>
+                    )}
+                    {focusTrack && <FocusLayout trackRef={focusTrack} />}
+                  </FocusLayoutContainer>
+                  <ReactionOverlay reactions={reactions} />
+                </div>
+              )}
+              {/* fork: the ControlBar between our own control groups. */}
+              <div className={ourLabels ? 'meet-bar' : 'meet-bar meet-bar-compact'}>
+                <div className="meet-bar-side">
+                  {channel && <InviteToChannel channelId={channel.id} />}
+                  <CopyInviteLink channelId={channel?.id} />
+                </div>
+                <ControlBar
+                  variation={controlBarLabels ? 'verbose' : 'minimal'}
+                  controls={{ chat: true, settings: !!SettingsComponent }}
+                />
+                <div className="meet-bar-side meet-bar-side-end">
+                  <RaiseHandButton />
+                  <ReactionButton onReact={react} />
+                  {focusTrack && (
+                    <button
+                      className="lk-button meet-strip-toggle"
+                      onClick={() => setStripHidden(!stripHidden)}
+                      aria-pressed={stripHidden}
+                      title={stripHidden ? 'Show participants' : 'Hide participants'}
+                    >
+                      <StripIcon />
+                      <span className="meet-bar-label">
+                        {stripHidden ? 'Show participants' : 'Hide participants'}
+                      </span>
+                    </button>
                   )}
-                  {focusTrack && <FocusLayout trackRef={focusTrack} />}
-                </FocusLayoutContainer>
-                <ReactionOverlay reactions={reactions} />
+                </div>
+              </div>
+            </div>
+            <Chat
+              style={{ display: widgetState.showChat ? 'grid' : 'none' }}
+              messageFormatter={chatMessageFormatter}
+              messageEncoder={chatMessageEncoder}
+              messageDecoder={chatMessageDecoder}
+            />
+            {SettingsComponent && (
+              <div
+                className="lk-settings-menu-modal"
+                style={{ display: widgetState.showSettings ? 'block' : 'none' }}
+              >
+                <SettingsComponent />
               </div>
             )}
-            {/* fork: the ControlBar between our own control groups. */}
-            <div className={ourLabels ? 'meet-bar' : 'meet-bar meet-bar-compact'}>
-              <div className="meet-bar-side">
-                {channel && <InviteToChannel channelId={channel.id} />}
-                <CopyInviteLink channelId={channel?.id} />
-              </div>
-              <ControlBar
-                variation={controlBarLabels ? 'verbose' : 'minimal'}
-                controls={{ chat: true, settings: !!SettingsComponent }}
-              />
-              <div className="meet-bar-side meet-bar-side-end">
-                <RaiseHandButton />
-                <ReactionButton onReact={react} />
-                {focusTrack && (
-                  <button
-                    className="lk-button meet-strip-toggle"
-                    onClick={() => setStripHidden(!stripHidden)}
-                    aria-pressed={stripHidden}
-                    title={stripHidden ? 'Show participants' : 'Hide participants'}
-                  >
-                    <StripIcon />
-                    <span className="meet-bar-label">
-                      {stripHidden ? 'Show participants' : 'Hide participants'}
-                    </span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-          <Chat
-            style={{ display: widgetState.showChat ? 'grid' : 'none' }}
-            messageFormatter={chatMessageFormatter}
-            messageEncoder={chatMessageEncoder}
-            messageDecoder={chatMessageDecoder}
-          />
-          {SettingsComponent && (
-            <div
-              className="lk-settings-menu-modal"
-              style={{ display: widgetState.showSettings ? 'block' : 'none' }}
-            >
-              <SettingsComponent />
-            </div>
-          )}
+          </HandsProvider>
         </LayoutContextProvider>
       )}
       <RoomAudioRenderer />

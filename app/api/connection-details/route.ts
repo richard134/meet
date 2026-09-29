@@ -100,8 +100,8 @@ function createParticipantToken(userInfo: AccessTokenOptions, roomName: string) 
     canPublish: true,
     canPublishData: true,
     canSubscribe: true,
-    // Raised hands are participant attributes (lib/RaiseHand.tsx).
-    canUpdateOwnMetadata: true,
+    // No canUpdateOwnMetadata: with it a participant could rename themselves
+    // after joining. Raised hands are data messages (lib/RaiseHand.tsx).
   };
   at.addGrant(grant);
   return at.toJwt();
