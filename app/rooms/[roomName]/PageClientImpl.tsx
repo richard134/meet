@@ -88,6 +88,35 @@ export function PageClientImpl(props: {
   }, []);
   const handlePreJoinError = React.useCallback((e: any) => console.error(e), []);
 
+  // Members go back to their start page. Everyone else stays here: the start
+  // page needs a login, which guests do not have, so they would get the
+  // browser's sign-in dialog instead.
+  const [left, setLeft] = React.useState(false);
+  const router = useRouter();
+  const handleLeave = React.useCallback(() => {
+    if (props.channel) {
+      router.push('/');
+    } else {
+      setLeft(true);
+    }
+  }, [props.channel, router]);
+
+  if (left) {
+    return (
+      <main
+        data-lk-theme="default"
+        style={{ display: 'grid', placeItems: 'center', height: '100%' }}
+      >
+        <div style={{ display: 'grid', gap: '1rem', justifyItems: 'center' }}>
+          <p style={{ margin: 0 }}>You are no longer in the call.</p>
+          <button className="lk-button" onClick={() => window.location.reload()}>
+            Rejoin
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main data-lk-theme="default" style={{ height: '100%' }}>
       {connectionDetails === undefined || preJoinChoices === undefined ? (
@@ -109,6 +138,7 @@ export function PageClientImpl(props: {
             singlePeerConnection: props.singlePeerConnection,
           }}
           channel={props.channel}
+          onLeave={handleLeave}
         />
       )}
     </main>
@@ -124,6 +154,7 @@ function VideoConferenceComponent(props: {
     singlePeerConnection: boolean;
   };
   channel?: { id: string; name: string };
+  onLeave: () => void;
 }) {
   const keyProvider = new ExternalE2EEKeyProvider();
   const { worker, e2eePassphrase } = useSetupE2EE();
@@ -230,8 +261,7 @@ function VideoConferenceComponent(props: {
 
   const lowPowerMode = useLowCPUOptimizer(room);
 
-  const router = useRouter();
-  const handleOnLeave = React.useCallback(() => router.push('/'), [router]);
+  const handleOnLeave = props.onLeave;
   const handleError = React.useCallback((error: Error) => {
     console.error(error);
     alert(`Encountered an unexpected error, check the console logs for details: ${error.message}`);
