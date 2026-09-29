@@ -22,7 +22,7 @@ import {
 } from '@livekit/components-react';
 import { RoomEvent, Track } from 'livekit-client';
 import * as React from 'react';
-import { CopyInviteLink } from './CopyInviteLink';
+import { CopyInviteLink, InviteToChannel } from './CopyInviteLink';
 import { RaiseHandButton, Tile, useRaisedHandToasts } from './RaiseHand';
 import { ReactionButton, ReactionOverlay, useReactions } from './Reactions';
 
@@ -38,6 +38,8 @@ export interface VideoConferenceProps extends React.HTMLAttributes<HTMLDivElemen
   chatMessageEncoder?: MessageEncoder;
   chatMessageDecoder?: MessageDecoder;
   SettingsComponent?: React.ComponentType;
+  // fork: set when a member is in one of their channels.
+  channel?: { id: string; name: string };
 }
 
 // fork: isEqualTrackRef and isWeb are from @livekit/components-core, which is
@@ -77,6 +79,7 @@ export function VideoConference({
   chatMessageDecoder,
   chatMessageEncoder,
   SettingsComponent,
+  channel,
   ...props
 }: VideoConferenceProps) {
   const [widgetState, setWidgetState] = React.useState<WidgetState>({
@@ -89,10 +92,11 @@ export function VideoConference({
   // fork: the bar holds the ControlBar and our groups, so it decides when
   // labels fit (the ControlBar alone would keep them down to 760px, 1000px
   // with chat open). Measured while sharing: labelled ControlBar 873px, our
-  // labelled groups 590px, icon-only groups about 200px, chat 450px.
+  // labelled groups 590px (about 710px in a channel, with two invite
+  // buttons), icon-only groups about 250px, chat 450px.
   const chatOffset = widgetState.showChat ? 450 : 0;
   const controlBarLabels = useMediaQuery(`(min-width: ${1200 + chatOffset}px)`);
-  const ourLabels = useMediaQuery(`(min-width: ${1600 + chatOffset}px)`);
+  const ourLabels = useMediaQuery(`(min-width: ${1700 + chatOffset}px)`);
   const lastAutoFocusedScreenShareTrack = React.useRef<TrackReferenceOrPlaceholder | null>(null);
 
   const tracks = useTracks(
@@ -180,7 +184,8 @@ export function VideoConference({
             {/* fork: the ControlBar between our own control groups. */}
             <div className={ourLabels ? 'meet-bar' : 'meet-bar meet-bar-compact'}>
               <div className="meet-bar-side">
-                <CopyInviteLink />
+                {channel && <InviteToChannel channelId={channel.id} />}
+                <CopyInviteLink channelId={channel?.id} />
               </div>
               <ControlBar
                 variation={controlBarLabels ? 'verbose' : 'minimal'}

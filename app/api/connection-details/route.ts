@@ -1,6 +1,7 @@
 import { randomString } from '@/lib/client-utils';
 import { getLiveKitURL } from '@/lib/getLiveKitURL';
-import { isValidInvite } from '@/lib/invite';
+import { verifyInvite } from '@/lib/invite';
+import { getChannel } from '@/lib/server/store';
 import { ConnectionDetails } from '@/lib/types';
 import { AccessToken, AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
 import { NextRequest, NextResponse } from 'next/server';
@@ -16,7 +17,6 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const roomName = request.nextUrl.searchParams.get('roomName');
     const participantName = request.nextUrl.searchParams.get('participantName');
-    const metadata = request.nextUrl.searchParams.get('metadata') ?? '';
     const region = request.nextUrl.searchParams.get('region');
     const invite = request.nextUrl.searchParams.get('invite');
     if (!LIVEKIT_URL) {
@@ -31,12 +31,23 @@ export async function GET(request: NextRequest) {
     if (typeof roomName !== 'string') {
       return new NextResponse('Missing required query parameter: roomName', { status: 400 });
     }
-    if (participantName === null) {
-      return new NextResponse('Missing required query parameter: participantName', { status: 400 });
-    }
-    if (invite === null || !isValidInvite(roomName, invite)) {
+    const verified = invite === null ? undefined : verifyInvite(roomName, invite);
+    if (!verified) {
       return new NextResponse('This invite link is invalid or has expired.', { status: 403 });
     }
+    const typedName = participantName?.trim() ?? '';
+    if (!verified.user && (typedName.length < 1 || typedName.length > 40)) {
+      return new NextResponse('A name is 1 to 40 characters', { status: 400 });
+    }
+
+    // In a channel, members join under their login name, from the signed
+    // invite, and everyone else is marked as a guest, so nobody can pass
+    // themselves off as a member. Ad-hoc rooms keep free names.
+    const channel = await getChannel(roomName);
+    if (verified.user && !channel?.members.includes(verified.user)) {
+      return new NextResponse('You are no longer a member of this channel.', { status: 403 });
+    }
+    const name = verified.user ?? (channel ? `${typedName} (guest)` : typedName);
 
     // Generate participant token
     if (!randomParticipantPostfix) {
@@ -44,9 +55,8 @@ export async function GET(request: NextRequest) {
     }
     const participantToken = await createParticipantToken(
       {
-        identity: `${participantName}__${randomParticipantPostfix}`,
-        name: participantName,
-        metadata,
+        identity: `${name}__${randomParticipantPostfix}`,
+        name,
       },
       roomName,
     );
@@ -56,7 +66,7 @@ export async function GET(request: NextRequest) {
       serverUrl: livekitServerUrl,
       roomName: roomName,
       participantToken: participantToken,
-      participantName: participantName,
+      participantName: name,
     };
     return new NextResponse(JSON.stringify(data), {
       headers: {

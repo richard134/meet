@@ -41,13 +41,23 @@ export function PageClientImpl(props: {
   hq: boolean;
   codec: VideoCodec;
   singlePeerConnection: boolean;
+  channel?: { id: string; name: string };
+  memberName?: string;
 }) {
+  // In a channel the address becomes /c/<id> straight away: that works for
+  // members (it mints a fresh invite) and for nobody else, unlike the member
+  // invite in the current URL, which would let whoever got it join as us.
+  React.useEffect(() => {
+    if (props.channel) {
+      window.history.replaceState(null, '', `/c/${props.channel.id}`);
+    }
+  }, [props.channel]);
   const [preJoinChoices, setPreJoinChoices] = React.useState<LocalUserChoices | undefined>(
     undefined,
   );
   const preJoinDefaults = React.useMemo(() => {
     return {
-      username: '',
+      username: props.memberName ?? '',
       videoEnabled: true,
       audioEnabled: true,
     };
@@ -98,6 +108,7 @@ export function PageClientImpl(props: {
             hq: props.hq,
             singlePeerConnection: props.singlePeerConnection,
           }}
+          channel={props.channel}
         />
       )}
     </main>
@@ -112,6 +123,7 @@ function VideoConferenceComponent(props: {
     codec: VideoCodec;
     singlePeerConnection: boolean;
   };
+  channel?: { id: string; name: string };
 }) {
   const keyProvider = new ExternalE2EEKeyProvider();
   const { worker, e2eePassphrase } = useSetupE2EE();
@@ -242,6 +254,7 @@ function VideoConferenceComponent(props: {
       <RoomContext.Provider value={room}>
         <KeyboardShortcuts />
         <VideoConference
+          channel={props.channel}
           chatMessageFormatter={formatChatMessageLinks}
           SettingsComponent={SettingsMenu}
         />

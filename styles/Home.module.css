@@ -24,3 +24,35 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.5rem;
 }
+
+.channel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.channelInfo {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.channelPresence {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  overflow-wrap: anywhere;
+}
+
+.channelForm {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.channelForm > input {
+  flex: 1;
+  min-width: 0;
+}
