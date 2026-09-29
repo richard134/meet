@@ -52,20 +52,26 @@ function configure() {
   }
 }
 
-// At most one "started hanging out" per channel every two minutes, so someone
-// dropping out and back in does not ping everyone twice.
+// Nobody gets "started hanging out" for the same channel twice within two
+// minutes, so someone dropping out and back in does not ping everyone again.
+// Tracked per recipient: a join that notified nobody (say, the only member
+// joining alone) must not hold back the next one for the others.
 const QUIET_MS = 2 * 60 * 1000;
-const lastSent = new Map<string, number>();
+const lastNotified = new Map<string, number>();
 
 export async function notifyChannelStarted(channel: Channel, byName: string, byUser?: string) {
   const now = Date.now();
-  if (now - (lastSent.get(channel.id) ?? 0) < QUIET_MS) {
+  const recipients = channel.members.filter(
+    (m) => m !== byUser && now - (lastNotified.get(`${channel.id}:${m}`) ?? 0) >= QUIET_MS,
+  );
+  if (recipients.length === 0) {
     return;
   }
-  lastSent.set(channel.id, now);
+  for (const m of recipients) {
+    lastNotified.set(`${channel.id}:${m}`, now);
+  }
   configure();
 
-  const recipients = channel.members.filter((m) => m !== byUser);
   const payload = JSON.stringify({
     title: channel.name,
     body: `${byName} started hanging out`,
