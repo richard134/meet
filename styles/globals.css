@@ -230,3 +230,31 @@ body {
     }
   }
 }
+
+/* The in-room question about notifications (lib/NotificationPrompt.tsx). */
+.meet-prompt {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(26rem, calc(100% - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--lk-border-color);
+  border-radius: var(--lk-border-radius);
+  background-color: var(--lk-bg2);
+  z-index: 30;
+}
+
+.meet-prompt > p {
+  margin: 0 0 0.75rem;
+}
+
+.meet-prompt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.lk-button.meet-prompt-primary {
+  background-color: var(--lk-accent-bg);
+}

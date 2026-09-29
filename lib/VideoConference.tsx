@@ -23,6 +23,7 @@ import {
 import { RoomEvent, Track } from 'livekit-client';
 import * as React from 'react';
 import { CopyInviteLink, InviteToChannel } from './CopyInviteLink';
+import { NotificationPrompt } from './NotificationPrompt';
 import { RaiseHandButton, Tile, useRaisedHandToasts } from './RaiseHand';
 import { ReactionButton, ReactionOverlay, useReactions } from './Reactions';
 
@@ -228,6 +229,7 @@ export function VideoConference({
       )}
       <RoomAudioRenderer />
       <ConnectionStateToast />
+      {channel && <NotificationPrompt channelName={channel.name} />}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { randomString } from '@/lib/client-utils';
 import { getLiveKitURL } from '@/lib/getLiveKitURL';
 import { verifyInvite } from '@/lib/invite';
+import { notifyChannelStarted } from '@/lib/server/push';
+import { participantNames } from '@/lib/server/rooms';
 import { getChannel } from '@/lib/server/store';
 import { ConnectionDetails } from '@/lib/types';
 import { AccessToken, AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
@@ -48,6 +50,14 @@ export async function GET(request: NextRequest) {
       return new NextResponse('You are no longer a member of this channel.', { status: 403 });
     }
     const name = verified.user ?? (channel ? `${typedName} (guest)` : typedName);
+
+    // "Started hanging out": only when the channel is empty. The joiner is not
+    // connected yet, so they do not count.
+    if (channel && (await participantNames(roomName)).length === 0) {
+      notifyChannelStarted(channel, name, verified.user).catch((e) =>
+        console.error('could not notify channel members', e),
+      );
+    }
 
     // Generate participant token
     if (!randomParticipantPostfix) {

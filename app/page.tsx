@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { copyWhenReady, fetchLink } from '@/lib/clipboard';
 import { encodePassphrase, randomString } from '@/lib/client-utils';
+import { usePush } from '@/lib/push-client';
 import styles from '../styles/Home.module.css';
 
 // The start page, behind the login: your channels with who is in them, a
@@ -115,7 +116,36 @@ function Channels() {
           Create channel
         </button>
       </form>
+      <Notifications />
     </div>
+  );
+}
+
+function Notifications() {
+  const { state, subscribed, canEnable, enable } = usePush();
+  if (subscribed) {
+    return <p style={{ margin: 0 }}>Notifications are on for this device.</p>;
+  }
+  if (state === 'denied') {
+    return (
+      <p style={{ margin: 0 }}>Notifications are blocked for this site in the browser settings.</p>
+    );
+  }
+  if (state === 'needs-home-screen') {
+    return (
+      <p style={{ margin: 0 }}>
+        For notifications on iPhone, add this site to your Home Screen (Share, then Add to Home
+        Screen) and open it from there.
+      </p>
+    );
+  }
+  if (!canEnable) {
+    return null;
+  }
+  return (
+    <button className="lk-button" onClick={enable}>
+      Notify me when someone starts hanging out
+    </button>
   );
 }
 

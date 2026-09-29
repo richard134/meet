@@ -13,19 +13,10 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: 'Share',
   },
+  appleWebApp: { capable: true, title: 'Share', statusBarStyle: 'black' },
   icons: {
-    icon: {
-      rel: 'icon',
-      url: '/favicon.ico',
-    },
-    apple: [
-      {
-        rel: 'apple-touch-icon',
-        url: '/images/livekit-apple-touch.png',
-        sizes: '180x180',
-      },
-      { rel: 'mask-icon', url: '/images/livekit-safari-pinned-tab.svg', color: '#070707' },
-    ],
+    icon: { rel: 'icon', url: '/favicon.ico' },
+    apple: [{ rel: 'apple-touch-icon', url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
   },
 };
 
